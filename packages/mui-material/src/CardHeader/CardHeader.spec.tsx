@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { styled } from '@mui/material/styles';
 import CardHeader, { CardHeaderProps, CardHeaderTypeMap } from '@mui/material/CardHeader';
 
 const CustomComponent: React.FC<{ stringProp: string; numberProp: number }> =
@@ -31,20 +32,20 @@ function createElementBasePropMixedTest() {
   React.createElement<CardHeaderProps>(CardHeader, {
     disableTypography: true,
   });
-  // @ts-expect-error CardHeader does not accept unknownProp
   React.createElement<CardHeaderProps<DefaultComponent, {}, React.ElementType>>(CardHeader, {
+    // @ts-expect-error CardHeader does not accept unknownProp
     unknownProp: 'shouldNotWork',
   });
-  // @ts-expect-error disableTypography does not accept strings
   React.createElement<CardHeaderProps>(CardHeader, {
+    // @ts-expect-error disableTypography does not accept strings
     disableTypography: 'hello',
   });
-  // @ts-expect-error disableTypography does not accept numbers
   React.createElement<CardHeaderProps>(CardHeader, {
+    // @ts-expect-error disableTypography does not accept numbers
     disableTypography: 1,
   });
-  // @ts-expect-error `component` is not a valid element
   React.createElement<CardHeaderProps<any, ComponentProp>>(CardHeader, {
+    // @ts-expect-error `component` is not a valid element
     component: 'incorrectElement',
   });
 }
@@ -55,9 +56,9 @@ function createElementTypographyTest() {
       align: 'center',
     },
   });
-  // @ts-expect-error
   React.createElement<CardHeaderProps>(CardHeader, {
     titleTypographyProps: {
+      // @ts-expect-error
       align: 'incorrectAlign',
     },
   });
@@ -66,9 +67,9 @@ function createElementTypographyTest() {
       variant: 'body1',
     },
   });
-  // @ts-expect-error
   React.createElement<CardHeaderProps>(CardHeader, {
     titleTypographyProps: {
+      // @ts-expect-error
       variant: 123,
     },
   });
@@ -105,14 +106,14 @@ function createElementTypographyTest() {
       unknownProp: 'shouldNotWork',
     },
   });
-  // @ts-expect-error
   React.createElement<CardHeaderProps<DefaultComponent, {}, React.ElementType>>(CardHeader, {
     titleTypographyProps: {
+      // @ts-expect-error
       component: 'incorrectComponent',
     },
   });
-  // @ts-expect-error
   React.createElement<CardHeaderProps>(CardHeader, {
+    // @ts-expect-error
     titleTypographyProps: true,
   });
 }
@@ -306,3 +307,49 @@ function mixedTypographyPropsTest() {
     subheaderTypographyProps={{ component: CustomComponent, numberProp: 2 }}
   />;
 }
+
+<CardHeader
+  slotProps={{
+    root: {
+      component: 'div',
+      className: 'flex',
+      'data-testid': 'hello',
+    },
+    action: {
+      component: 'div',
+      className: 'flex',
+      'data-testid': 'hello',
+    },
+    avatar: {
+      component: 'div',
+      className: 'flex',
+      'data-testid': 'hello',
+    },
+    content: {
+      component: 'div',
+      className: 'flex',
+      'data-testid': 'hello',
+    },
+    title: {
+      component: 'div',
+      className: 'flex',
+      'data-testid': 'hello',
+    },
+    subheader: {
+      component: 'div',
+      className: 'flex',
+      'data-testid': 'hello',
+    },
+  }}
+/>;
+const CustomSlot = styled('div')({});
+<CardHeader
+  slots={{
+    action: CustomSlot,
+    avatar: CustomSlot,
+    content: CustomSlot,
+    root: CustomSlot,
+    subheader: CustomSlot,
+    title: CustomSlot,
+  }}
+/>;
