@@ -68,7 +68,7 @@ const StyledTab = styled(Tab)`
 const StyledTabPanel = styled(TabPanel)(
   ({ theme }) => `
   width: 100%;
-  font-family: IBM Plex Sans, sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.875rem;
   padding: 20px 12px;
   background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
@@ -87,9 +87,8 @@ const StyledTabsList = styled(TabsList)(
   margin-bottom: 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  align-content: space-between;
-  box-shadow: 0px 4px 30px ${theme.palette.mode === 'dark' ? grey[900] : grey[200]};
+  place-content: space-between center;
+  box-shadow: 0 4px 30px ${theme.palette.mode === 'dark' ? grey[900] : grey[200]};
   `,
 );
 
@@ -145,7 +144,7 @@ export default function UnstyledTabsIntroduction() {
         <input
           type="checkbox"
           checked={selectionFollowsFocus}
-          onChange={(e) => setSelectionFollowsFocus(e.target.checked)}
+          onChange={(event) => setSelectionFollowsFocus(event.target.checked)}
         />{' '}
         Selection follows focus
       </label>

@@ -3,7 +3,7 @@ import Input from '@mui/joy/Input';
 import Stack from '@mui/joy/Stack';
 
 export default function InputSlotProps() {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   return (
     <Stack spacing={1.5} sx={{ minWidth: 300 }}>
       <Input
@@ -22,8 +22,8 @@ export default function InputSlotProps() {
         type="date"
         slotProps={{
           input: {
-            min: '2018-06-07T00:00',
-            max: '2018-06-14T00:00',
+            min: '2018-06-07',
+            max: '2018-06-14',
           },
         }}
       />
