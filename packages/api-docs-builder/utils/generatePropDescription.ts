@@ -1,12 +1,13 @@
 import * as doctrine from 'doctrine';
 import * as recast from 'recast';
 import { PropTypeDescriptor } from 'react-docgen';
+import { escapeCell, removeNewLines } from '../buildApi';
 import {
   isElementTypeAcceptingRefProp,
   isElementAcceptingRefProp,
 } from './generatePropTypeDescription';
 import { DescribeablePropDescriptor } from './createDescribeableProp';
-import escapeCell from './escapeCell';
+import { SeeMore } from '../types/utils.types';
 
 function resolveType(type: NonNullable<doctrine.Tag['type']>): string {
   if (type.type === 'AllLiteral') {
@@ -76,6 +77,7 @@ export default function generatePropDescription(
   propName: string,
 ): {
   deprecated: string;
+  seeMore?: SeeMore;
   jsDocText: string;
   signature?: string;
   signatureArgs?: { name: string; description: string }[];
@@ -93,11 +95,22 @@ export default function generatePropDescription(
     }
   }
 
-  // Two new lines result in a newline in the table.
-  // All other new lines must be eliminated to prevent markdown mayhem.
-  const jsDocText = escapeCell(annotation.description)
-    .replace(/(\r?\n){2}/g, '<br>')
-    .replace(/\r?\n/g, ' ');
+  const seeTag = annotation.tags.find((tag) => tag.title === 'see');
+  let seeMore;
+  if (seeTag && seeTag.description) {
+    const params = seeTag.description.match(/{@link ([^|| ]*)[|| ]([^}]*)}/);
+    if (params?.length === 3) {
+      seeMore = {
+        description: seeTag.description.replace(/{@link ([^|| ]*)[|| ]([^}]*)}/, '{{link}}'),
+        link: {
+          url: params[1],
+          text: params[2],
+        },
+      };
+    }
+  }
+
+  const jsDocText = escapeCell(annotation.description);
 
   // Split up the parsed tags into 'arguments' and 'returns' parsed objects. If there's no
   // 'returns' parsed object (i.e., one with title being 'returns'), make one of type 'void'.
@@ -116,7 +129,7 @@ export default function generatePropDescription(
     // Remove new lines from tag descriptions to avoid markdown errors.
     annotation.tags.forEach((tag) => {
       if (tag.description) {
-        tag.description = tag.description.replace(/\r*\n/g, ' ');
+        tag.description = removeNewLines(tag.description);
       }
     });
 
@@ -157,6 +170,7 @@ export default function generatePropDescription(
 
   return {
     deprecated,
+    seeMore,
     jsDocText,
     signature,
     signatureArgs,

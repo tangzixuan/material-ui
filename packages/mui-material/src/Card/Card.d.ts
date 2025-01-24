@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { SxProps } from '@mui/system';
 import { DistributiveOmit } from '@mui/types';
-import { OverridableComponent, OverrideProps } from '@mui/material/OverridableComponent';
+import { OverridableComponent, OverrideProps } from '../OverridableComponent';
 import { Theme } from '..';
 import { PaperOwnProps } from '../Paper';
 import { CardClasses } from './cardClasses';
@@ -9,27 +9,28 @@ import { CardClasses } from './cardClasses';
 // TODO: v6 remove this interface, it is not used
 export interface CardPropsColorOverrides {}
 
+export interface CardOwnProps extends DistributiveOmit<PaperOwnProps, 'classes'> {
+  /**
+   * Override or extend the styles applied to the component.
+   */
+  classes?: Partial<CardClasses>;
+  /**
+   * If `true`, the card will use raised styling.
+   * @default false
+   */
+  raised?: boolean;
+  /**
+   * The system prop that allows defining system overrides as well as additional CSS styles.
+   */
+  sx?: SxProps<Theme>;
+}
+
 export interface CardTypeMap<
   AdditionalProps = {},
-  DefaultComponent extends React.ElementType = 'div',
+  RootComponent extends React.ElementType = 'div',
 > {
-  props: AdditionalProps &
-    DistributiveOmit<PaperOwnProps, 'classes'> & {
-      /**
-       * Override or extend the styles applied to the component.
-       */
-      classes?: Partial<CardClasses>;
-      /**
-       * If `true`, the card will use raised styling.
-       * @default false
-       */
-      raised?: boolean;
-      /**
-       * The system prop that allows defining system overrides as well as additional CSS styles.
-       */
-      sx?: SxProps<Theme>;
-    };
-  defaultComponent: DefaultComponent;
+  props: AdditionalProps & CardOwnProps;
+  defaultComponent: RootComponent;
 }
 
 /**
