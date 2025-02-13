@@ -66,6 +66,17 @@ function MyAutocomplete<
   renderInput={() => null}
 />;
 
+// Tests presence of onMouseDown prop in InputProps
+<Autocomplete
+  options={['1', '2', '3']}
+  renderInput={(params) => {
+    expectType<React.MouseEventHandler, typeof params.InputProps.onMouseDown>(
+      params.InputProps.onMouseDown,
+    );
+    return <TextField {...params} />;
+  }}
+/>;
+
 <MyAutocomplete
   options={['1', '2', '3']}
   onChange={(event, value) => {
@@ -157,3 +168,17 @@ function CustomListboxRef() {
     />
   );
 }
+
+// Tests presence of defaultMuiPrevented in event
+<Autocomplete
+  renderInput={(params) => <TextField {...params} />}
+  options={['one', 'two', 'three']}
+  onKeyDown={(event) => {
+    expectType<
+      React.KeyboardEvent<HTMLDivElement> & {
+        defaultMuiPrevented?: boolean;
+      },
+      typeof event
+    >(event);
+  }}
+/>;

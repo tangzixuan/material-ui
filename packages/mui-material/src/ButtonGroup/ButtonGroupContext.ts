@@ -1,7 +1,8 @@
+'use client';
 import * as React from 'react';
 import type { ButtonGroupProps } from './ButtonGroup';
 
-interface IButtonGroupContext {
+interface ButtonGroupContextType {
   className?: string;
   color?: ButtonGroupProps['color'];
   disabled?: boolean;
@@ -16,7 +17,7 @@ interface IButtonGroupContext {
 /**
  * @ignore - internal component.
  */
-const ButtonGroupContext = React.createContext<IButtonGroupContext>({});
+const ButtonGroupContext = React.createContext<ButtonGroupContextType>({});
 
 if (process.env.NODE_ENV !== 'production') {
   ButtonGroupContext.displayName = 'ButtonGroupContext';

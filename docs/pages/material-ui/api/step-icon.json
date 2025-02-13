@@ -18,17 +18,44 @@
     "import StepIcon from '@mui/material/StepIcon';",
     "import { StepIcon } from '@mui/material';"
   ],
-  "styles": {
-    "classes": ["root", "text", "active", "completed", "error"],
-    "globalClasses": { "active": "Mui-active", "completed": "Mui-completed", "error": "Mui-error" },
-    "name": "MuiStepIcon"
-  },
+  "classes": [
+    {
+      "key": "active",
+      "className": "Mui-active",
+      "description": "State class applied to the root element if `active={true}`.",
+      "isGlobal": true
+    },
+    {
+      "key": "completed",
+      "className": "Mui-completed",
+      "description": "State class applied to the root element if `completed={true}`.",
+      "isGlobal": true
+    },
+    {
+      "key": "error",
+      "className": "Mui-error",
+      "description": "State class applied to the root element if `error={true}`.",
+      "isGlobal": true
+    },
+    {
+      "key": "root",
+      "className": "MuiStepIcon-root",
+      "description": "Styles applied to the root element.",
+      "isGlobal": false
+    },
+    {
+      "key": "text",
+      "className": "MuiStepIcon-text",
+      "description": "Styles applied to the SVG text element.",
+      "isGlobal": false
+    }
+  ],
   "spread": true,
   "themeDefaultProps": true,
   "muiName": "MuiStepIcon",
   "forwardsRefTo": "SVGSVGElement",
   "filename": "/packages/mui-material/src/StepIcon/StepIcon.js",
-  "inheritance": null,
+  "inheritance": { "component": "SvgIcon", "pathname": "/material-ui/api/svg-icon/" },
   "demos": "<ul><li><a href=\"/material-ui/react-stepper/\">Stepper</a></li></ul>",
   "cssComponent": false
 }

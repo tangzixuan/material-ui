@@ -1,5 +1,5 @@
-import { unstable_generateUtilityClasses as generateUtilityClasses } from '@mui/utils';
-import generateUtilityClass from '../generateUtilityClass';
+import generateUtilityClasses from '@mui/utils/generateUtilityClasses';
+import generateUtilityClass from '@mui/utils/generateUtilityClass';
 
 export interface SliderClasses {
   /** Styles applied to the root element. */
@@ -8,6 +8,14 @@ export interface SliderClasses {
   colorPrimary: string;
   /** Styles applied to the root element if `color="secondary"`. */
   colorSecondary: string;
+  /** Styles applied to the root element if `color="error"`. */
+  colorError: string;
+  /** Styles applied to the root element if `color="info"`. */
+  colorInfo: string;
+  /** Styles applied to the root element if `color="success"`. */
+  colorSuccess: string;
+  /** Styles applied to the root element if `color="warning"`. */
+  colorWarning: string;
   /** Styles applied to the root element if `marks` is provided with at least one label. */
   marked: string;
   /** Styles applied to the root element if `orientation="vertical"`. */
@@ -40,11 +48,33 @@ export interface SliderClasses {
   markLabelActive: string;
   /** Styles applied to the root element if `size="small"`. */
   sizeSmall: string;
-  /** Styles applied to the thumb element if `color="primary"`. */
+  /** Styles applied to the thumb element if `color="primary"`.
+   * @deprecated Combine the [.MuiSlider-thumb](/material-ui/api/slider/#slider-classes-thumb) and [.MuiSlider-colorPrimary](/material-ui/api/slider/#slider-classes-colorPrimary) classes instead. See [Migrating from deprecated APIs](/material-ui/migration/migrating-from-deprecated-apis/) for more details.
+   */
   thumbColorPrimary: string;
-  /** Styles applied to the thumb element if `color="secondary"`. */
+  /** Styles applied to the thumb element if `color="secondary"`.
+   * @deprecated Combine the [.MuiSlider-thumb](/material-ui/api/slider/#slider-classes-thumb) and [.MuiSlider-colorSecondary](/material-ui/api/slider/#slider-classes-colorSecondary) classes instead. See [Migrating from deprecated APIs](/material-ui/migration/migrating-from-deprecated-apis/) for more details.
+   */
   thumbColorSecondary: string;
-  /** Styles applied to the thumb element if `size="small"`. */
+  /** Styles applied to the thumb element if `color="error"`.
+   * @deprecated Combine the [.MuiSlider-thumb](/material-ui/api/slider/#slider-classes-thumb) and [.MuiSlider-colorError](/material-ui/api/slider/#slider-classes-colorError) classes instead. See [Migrating from deprecated APIs](/material-ui/migration/migrating-from-deprecated-apis/) for more details.
+   */
+  thumbColorError: string;
+  /** Styles applied to the thumb element if `color="info"`.
+   * @deprecated Combine the [.MuiSlider-thumb](/material-ui/api/slider/#slider-classes-thumb) and [.MuiSlider-colorInfo](/material-ui/api/slider/#slider-classes-colorInfo) classes instead. See [Migrating from deprecated APIs](/material-ui/migration/migrating-from-deprecated-apis/) for more details.
+   */
+  thumbColorInfo: string;
+  /** Styles applied to the thumb element if `color="success"`.
+   * @deprecated Combine the [.MuiSlider-thumb](/material-ui/api/slider/#slider-classes-thumb) and [.MuiSlider-colorSuccess](/material-ui/api/slider/#slider-classes-colorSuccess) classes instead. See [Migrating from deprecated APIs](/material-ui/migration/migrating-from-deprecated-apis/) for more details.
+   */
+  thumbColorSuccess: string;
+  /** Styles applied to the thumb element if `color="warning"`.
+   * @deprecated Combine the [.MuiSlider-thumb](/material-ui/api/slider/#slider-classes-thumb) and [.MuiSlider-colorWarning](/material-ui/api/slider/#slider-classes-colorWarning) classes instead. See [Migrating from deprecated APIs](/material-ui/migration/migrating-from-deprecated-apis/) for more details.
+   */
+  thumbColorWarning: string;
+  /** Styles applied to the thumb element if `size="small"`.
+   * @deprecated Combine the [.MuiSlider-thumb](/material-ui/api/slider/#slider-classes-thumb) and [.MuiSlider-sizeSmall](/material-ui/api/slider/#slider-classes-sizeSmall) classes instead. See [Migrating from deprecated APIs](/material-ui/migration/migrating-from-deprecated-apis/) for more details.
+   */
   thumbSizeSmall: string;
   /** Styles applied to the thumb label element. */
   valueLabel: string;
@@ -67,6 +97,10 @@ const sliderClasses: SliderClasses = generateUtilityClasses('MuiSlider', [
   'active',
   'colorPrimary',
   'colorSecondary',
+  'colorError',
+  'colorInfo',
+  'colorSuccess',
+  'colorWarning',
   'disabled',
   'dragging',
   'focusVisible',
@@ -80,6 +114,10 @@ const sliderClasses: SliderClasses = generateUtilityClasses('MuiSlider', [
   'thumb',
   'thumbColorPrimary',
   'thumbColorSecondary',
+  'thumbColorError',
+  'thumbColorSuccess',
+  'thumbColorInfo',
+  'thumbColorWarning',
   'track',
   'trackInverted',
   'trackFalse',

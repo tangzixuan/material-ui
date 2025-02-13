@@ -5,6 +5,7 @@ import { InternalStandardProps as StandardProps, Theme } from '..';
 import { CircularProgressClasses } from './circularProgressClasses';
 
 export interface CircularProgressPropsColorOverrides {}
+export interface CircularProgressPropsVariantOverrides {}
 
 export interface CircularProgressProps
   extends StandardProps<React.HTMLAttributes<HTMLSpanElement>, 'children'> {
@@ -15,7 +16,7 @@ export interface CircularProgressProps
   /**
    * The color of the component.
    * It supports both default and custom theme colors, which can be added as shown in the
-   * [palette customization guide](https://mui.com/material-ui/customization/palette/#adding-new-colors).
+   * [palette customization guide](https://mui.com/material-ui/customization/palette/#custom-colors).
    * @default 'primary'
    */
   color?: OverridableStringUnion<
@@ -31,7 +32,7 @@ export interface CircularProgressProps
   /**
    * The size of the component.
    * If using a number, the pixel unit is assumed.
-   * If using a string, you need to provide the CSS unit, e.g '3rem'.
+   * If using a string, you need to provide the CSS unit, for example '3rem'.
    * @default 40
    */
   size?: number | string;
@@ -55,7 +56,10 @@ export interface CircularProgressProps
    * Use indeterminate when there is no progress value.
    * @default 'indeterminate'
    */
-  variant?: 'determinate' | 'indeterminate';
+  variant?: OverridableStringUnion<
+    'determinate' | 'indeterminate',
+    CircularProgressPropsVariantOverrides
+  >;
 }
 
 /**
@@ -67,10 +71,10 @@ export interface CircularProgressProps
  *
  * Demos:
  *
- * - [Progress](https://mui.com/material-ui/react-progress/)
+ * - [Progress](https://next.mui.com/material-ui/react-progress/)
  *
  * API:
  *
- * - [CircularProgress API](https://mui.com/material-ui/api/circular-progress/)
+ * - [CircularProgress API](https://next.mui.com/material-ui/api/circular-progress/)
  */
-export default function CircularProgress(props: CircularProgressProps): JSX.Element;
+export default function CircularProgress(props: CircularProgressProps): React.JSX.Element;

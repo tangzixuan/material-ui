@@ -3,13 +3,14 @@ import * as React from 'react';
 import { isFragment } from 'react-is';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { refType } from '@mui/utils';
-import { unstable_composeClasses as composeClasses, useSlotProps } from '@mui/base';
-import styled from '../styles/styled';
-import useThemeProps from '../styles/useThemeProps';
-import useTheme from '../styles/useTheme';
+import refType from '@mui/utils/refType';
+import composeClasses from '@mui/utils/composeClasses';
+import { useRtl } from '@mui/system/RtlProvider';
+import useSlotProps from '@mui/utils/useSlotProps';
+import { styled, useTheme } from '../zero-styled';
+import memoTheme from '../utils/memoTheme';
+import { useDefaultProps } from '../DefaultPropsProvider';
 import debounce from '../utils/debounce';
-import { getNormalizedScrollLeft, detectScrollType } from '../utils/scrollLeft';
 import animate from '../internal/animate';
 import ScrollbarSize from './ScrollbarSize';
 import TabScrollButton from '../TabScrollButton';
@@ -17,6 +18,7 @@ import useEventCallback from '../utils/useEventCallback';
 import tabsClasses, { getTabsUtilityClass } from './tabsClasses';
 import ownerDocument from '../utils/ownerDocument';
 import ownerWindow from '../utils/ownerWindow';
+import useSlot from '../utils/useSlot';
 
 const nextItem = (list, item) => {
   if (list === item) {
@@ -86,7 +88,13 @@ const useUtilityClasses = (ownerState) => {
       scrollableX && 'scrollableX',
       scrollableY && 'scrollableY',
     ],
-    flexContainer: ['flexContainer', vertical && 'flexContainerVertical', centered && 'centered'],
+    list: [
+      'list',
+      'flexContainer',
+      vertical && 'flexContainerVertical',
+      vertical && 'vertical',
+      centered && 'centered',
+    ],
     indicator: ['indicator'],
     scrollButtons: ['scrollButtons', scrollButtonsHideMobile && 'scrollButtonsHideMobile'],
     scrollableX: [scrollableX && 'scrollableX'],
@@ -112,23 +120,33 @@ const TabsRoot = styled('div', {
       ownerState.vertical && styles.vertical,
     ];
   },
-})(({ ownerState, theme }) => ({
-  overflow: 'hidden',
-  minHeight: 48,
-  // Add iOS momentum scrolling for iOS < 13.0
-  WebkitOverflowScrolling: 'touch',
-  display: 'flex',
-  ...(ownerState.vertical && {
-    flexDirection: 'column',
-  }),
-  ...(ownerState.scrollButtonsHideMobile && {
-    [`& .${tabsClasses.scrollButtons}`]: {
-      [theme.breakpoints.down('sm')]: {
-        display: 'none',
+})(
+  memoTheme(({ theme }) => ({
+    overflow: 'hidden',
+    minHeight: 48,
+    // Add iOS momentum scrolling for iOS < 13.0
+    WebkitOverflowScrolling: 'touch',
+    display: 'flex',
+    variants: [
+      {
+        props: ({ ownerState }) => ownerState.vertical,
+        style: {
+          flexDirection: 'column',
+        },
       },
-    },
-  }),
-}));
+      {
+        props: ({ ownerState }) => ownerState.scrollButtonsHideMobile,
+        style: {
+          [`& .${tabsClasses.scrollButtons}`]: {
+            [theme.breakpoints.down('sm')]: {
+              display: 'none',
+            },
+          },
+        },
+      },
+    ],
+  })),
+);
 
 const TabsScroller = styled('div', {
   name: 'MuiTabs',
@@ -143,80 +161,117 @@ const TabsScroller = styled('div', {
       ownerState.scrollableY && styles.scrollableY,
     ];
   },
-})(({ ownerState }) => ({
+})({
   position: 'relative',
   display: 'inline-block',
   flex: '1 1 auto',
   whiteSpace: 'nowrap',
-  ...(ownerState.fixed && {
-    overflowX: 'hidden',
-    width: '100%',
-  }),
-  ...(ownerState.hideScrollbar && {
-    // Hide dimensionless scrollbar on macOS
-    scrollbarWidth: 'none', // Firefox
-    '&::-webkit-scrollbar': {
-      display: 'none', // Safari + Chrome
+  variants: [
+    {
+      props: ({ ownerState }) => ownerState.fixed,
+      style: {
+        overflowX: 'hidden',
+        width: '100%',
+      },
     },
-  }),
-  ...(ownerState.scrollableX && {
-    overflowX: 'auto',
-    overflowY: 'hidden',
-  }),
-  ...(ownerState.scrollableY && {
-    overflowY: 'auto',
-    overflowX: 'hidden',
-  }),
-}));
+    {
+      props: ({ ownerState }) => ownerState.hideScrollbar,
+      style: {
+        // Hide dimensionless scrollbar on macOS
+        scrollbarWidth: 'none', // Firefox
+        '&::-webkit-scrollbar': {
+          display: 'none', // Safari + Chrome
+        },
+      },
+    },
+    {
+      props: ({ ownerState }) => ownerState.scrollableX,
+      style: {
+        overflowX: 'auto',
+        overflowY: 'hidden',
+      },
+    },
+    {
+      props: ({ ownerState }) => ownerState.scrollableY,
+      style: {
+        overflowY: 'auto',
+        overflowX: 'hidden',
+      },
+    },
+  ],
+});
 
-const FlexContainer = styled('div', {
+const List = styled('div', {
   name: 'MuiTabs',
-  slot: 'FlexContainer',
+  slot: 'List',
   overridesResolver: (props, styles) => {
     const { ownerState } = props;
     return [
+      styles.list,
       styles.flexContainer,
       ownerState.vertical && styles.flexContainerVertical,
       ownerState.centered && styles.centered,
     ];
   },
-})(({ ownerState }) => ({
+})({
   display: 'flex',
-  ...(ownerState.vertical && {
-    flexDirection: 'column',
-  }),
-  ...(ownerState.centered && {
-    justifyContent: 'center',
-  }),
-}));
+  variants: [
+    {
+      props: ({ ownerState }) => ownerState.vertical,
+      style: {
+        flexDirection: 'column',
+      },
+    },
+    {
+      props: ({ ownerState }) => ownerState.centered,
+      style: {
+        justifyContent: 'center',
+      },
+    },
+  ],
+});
 
 const TabsIndicator = styled('span', {
   name: 'MuiTabs',
   slot: 'Indicator',
   overridesResolver: (props, styles) => styles.indicator,
-})(({ ownerState, theme }) => ({
-  position: 'absolute',
-  height: 2,
-  bottom: 0,
-  width: '100%',
-  transition: theme.transitions.create(),
-  ...(ownerState.indicatorColor === 'primary' && {
-    backgroundColor: (theme.vars || theme).palette.primary.main,
-  }),
-  ...(ownerState.indicatorColor === 'secondary' && {
-    backgroundColor: (theme.vars || theme).palette.secondary.main,
-  }),
-  ...(ownerState.vertical && {
-    height: '100%',
-    width: 2,
-    right: 0,
-  }),
-}));
+})(
+  memoTheme(({ theme }) => ({
+    position: 'absolute',
+    height: 2,
+    bottom: 0,
+    width: '100%',
+    transition: theme.transitions.create(),
+    variants: [
+      {
+        props: {
+          indicatorColor: 'primary',
+        },
+        style: {
+          backgroundColor: (theme.vars || theme).palette.primary.main,
+        },
+      },
+      {
+        props: {
+          indicatorColor: 'secondary',
+        },
+        style: {
+          backgroundColor: (theme.vars || theme).palette.secondary.main,
+        },
+      },
+      {
+        props: ({ ownerState }) => ownerState.vertical,
+        style: {
+          height: '100%',
+          width: 2,
+          right: 0,
+        },
+      },
+    ],
+  })),
+);
 
-const TabsScrollbarSize = styled(ScrollbarSize, {
-  name: 'MuiTabs',
-  slot: 'ScrollbarSize',
-})({
+const TabsScrollbarSize = styled(ScrollbarSize)({
   overflowX: 'auto',
   overflowY: 'hidden',
   // Hide dimensionless scrollbar on macOS
@@ -231,9 +286,9 @@ const defaultIndicatorStyle = {};
 let warnedOnceTabPresent = false;
 
 const Tabs = React.forwardRef(function Tabs(inProps, ref) {
-  const props = useThemeProps({ props: inProps, name: 'MuiTabs' });
+  const props = useDefaultProps({ props: inProps, name: 'MuiTabs' });
   const theme = useTheme();
-  const isRtl = theme.direction === 'rtl';
+  const isRtl = useRtl();
   const {
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
@@ -246,13 +301,13 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
     indicatorColor = 'primary',
     onChange,
     orientation = 'horizontal',
-    ScrollButtonComponent = TabScrollButton,
+    ScrollButtonComponent, // TODO: remove in v7 (deprecated in v6)
     scrollButtons = 'auto',
     selectionFollowsFocus,
     slots = {},
     slotProps = {},
-    TabIndicatorProps = {},
-    TabScrollButtonProps = {},
+    TabIndicatorProps = {}, // TODO: remove in v7 (deprecated in v6)
+    TabScrollButtonProps = {}, // TODO: remove in v7 (deprecated in v6)
     textColor = 'primary',
     value,
     variant = 'standard',
@@ -325,6 +380,15 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
   const tabsRef = React.useRef(null);
   const tabListRef = React.useRef(null);
 
+  const externalForwardedProps = {
+    slots,
+    slotProps: {
+      indicator: TabIndicatorProps,
+      scrollButton: TabScrollButtonProps,
+      ...slotProps,
+    },
+  };
+
   const getTabsMeta = () => {
     const tabsNode = tabsRef.current;
     let tabsMeta;
@@ -335,7 +399,6 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
         clientWidth: tabsNode.clientWidth,
         scrollLeft: tabsNode.scrollLeft,
         scrollTop: tabsNode.scrollTop,
-        scrollLeftNormalized: getNormalizedScrollLeft(tabsNode, theme.direction),
         scrollWidth: tabsNode.scrollWidth,
         top: rect.top,
         bottom: rect.bottom,
@@ -407,11 +470,9 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
     } else {
       startIndicator = isRtl ? 'right' : 'left';
       if (tabMeta && tabsMeta) {
-        const correction = isRtl
-          ? tabsMeta.scrollLeftNormalized + tabsMeta.clientWidth - tabsMeta.scrollWidth
-          : tabsMeta.scrollLeft;
         startValue =
-          (isRtl ? -1 : 1) * (tabMeta[startIndicator] - tabsMeta[startIndicator] + correction);
+          (isRtl ? -1 : 1) *
+          (tabMeta[startIndicator] - tabsMeta[startIndicator] + tabsMeta.scrollLeft);
       }
     }
 
@@ -421,9 +482,10 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
       [size]: tabMeta ? tabMeta[size] : 0,
     };
 
-    // IE11 support, replace with Number.isNaN
-    // eslint-disable-next-line no-restricted-globals
-    if (isNaN(indicatorStyle[startIndicator]) || isNaN(indicatorStyle[size])) {
+    if (
+      typeof indicatorStyle[startIndicator] !== 'number' ||
+      typeof indicatorStyle[size] !== 'number'
+    ) {
       setIndicatorStyle(newIndicatorStyle);
     } else {
       const dStart = Math.abs(indicatorStyle[startIndicator] - newIndicatorStyle[startIndicator]);
@@ -452,8 +514,6 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
       scrollValue += delta;
     } else {
       scrollValue += delta * (isRtl ? -1 : 1);
-      // Fix for Edge
-      scrollValue *= isRtl && detectScrollType() === 'reverse' ? -1 : 1;
     }
 
     scroll(scrollValue);
@@ -488,23 +548,53 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
     moveTabsScroll(getScrollSize());
   };
 
+  const [ScrollbarSlot, { onChange: scrollbarOnChange, ...scrollbarSlotProps }] = useSlot(
+    'scrollbar',
+    {
+      className: clsx(classes.scrollableX, classes.hideScrollbar),
+      elementType: TabsScrollbarSize,
+      shouldForwardComponentProp: true,
+      externalForwardedProps,
+      ownerState,
+    },
+  );
+
   // TODO Remove <ScrollbarSize /> as browser support for hiding the scrollbar
   // with CSS improves.
-  const handleScrollbarSizeChange = React.useCallback((scrollbarWidth) => {
-    setScrollerStyle({
-      overflow: null,
-      scrollbarWidth,
-    });
-  }, []);
+  const handleScrollbarSizeChange = React.useCallback(
+    (scrollbarWidth) => {
+      scrollbarOnChange?.(scrollbarWidth);
+      setScrollerStyle({
+        overflow: null,
+        scrollbarWidth,
+      });
+    },
+    [scrollbarOnChange],
+  );
+
+  const [ScrollButtonsSlot, scrollButtonSlotProps] = useSlot('scrollButtons', {
+    className: clsx(classes.scrollButtons, TabScrollButtonProps.className),
+    elementType: TabScrollButton,
+    externalForwardedProps,
+    ownerState,
+    additionalProps: {
+      orientation,
+      slots: {
+        StartScrollButtonIcon: slots.startScrollButtonIcon || slots.StartScrollButtonIcon,
+        EndScrollButtonIcon: slots.endScrollButtonIcon || slots.EndScrollButtonIcon,
+      },
+      slotProps: {
+        startScrollButtonIcon: startScrollButtonIconProps,
+        endScrollButtonIcon: endScrollButtonIconProps,
+      },
+    },
+  });
 
   const getConditionalElements = () => {
     const conditionalElements = {};
 
     conditionalElements.scrollbarSizeListener = scrollable ? (
-      <TabsScrollbarSize
-        onChange={handleScrollbarSizeChange}
-        className={clsx(classes.scrollableX, classes.hideScrollbar)}
-      />
+      <ScrollbarSlot {...scrollbarSlotProps} onChange={handleScrollbarSizeChange} />
     ) : null;
 
     const scrollButtonsActive = displayStartScroll || displayEndScroll;
@@ -512,30 +602,20 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
       scrollable && ((scrollButtons === 'auto' && scrollButtonsActive) || scrollButtons === true);
 
     conditionalElements.scrollButtonStart = showScrollButtons ? (
-      <ScrollButtonComponent
-        slots={{ StartScrollButtonIcon: slots.StartScrollButtonIcon }}
-        slotProps={{ startScrollButtonIcon: startScrollButtonIconProps }}
-        orientation={orientation}
+      <ScrollButtonsSlot
         direction={isRtl ? 'right' : 'left'}
         onClick={handleStartScrollClick}
         disabled={!displayStartScroll}
-        {...TabScrollButtonProps}
-        className={clsx(classes.scrollButtons, TabScrollButtonProps.className)}
+        {...scrollButtonSlotProps}
       />
     ) : null;
 
     conditionalElements.scrollButtonEnd = showScrollButtons ? (
-      <ScrollButtonComponent
-        slots={{ EndScrollButtonIcon: slots.EndScrollButtonIcon }}
-        slotProps={{
-          endScrollButtonIcon: endScrollButtonIconProps,
-        }}
-        orientation={orientation}
+      <ScrollButtonsSlot
         direction={isRtl ? 'left' : 'right'}
         onClick={handleEndScrollClick}
         disabled={!displayEndScroll}
-        {...TabScrollButtonProps}
-        className={clsx(classes.scrollButtons, TabScrollButtonProps.className)}
+        {...scrollButtonSlotProps}
       />
     ) : null;
 
@@ -578,10 +658,29 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
         updateIndicatorState();
       }
     });
+
+    let resizeObserver;
+
+    /**
+     * @type {MutationCallback}
+     */
+    const handleMutation = (records) => {
+      records.forEach((record) => {
+        record.removedNodes.forEach((item) => {
+          resizeObserver?.unobserve(item);
+        });
+        record.addedNodes.forEach((item) => {
+          resizeObserver?.observe(item);
+        });
+      });
+      handleResize();
+      updateScrollButtonState();
+    };
+
     const win = ownerWindow(tabsRef.current);
     win.addEventListener('resize', handleResize);
 
-    let resizeObserver;
+    let mutationObserver;
 
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(handleResize);
@@ -590,14 +689,20 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
       });
     }
 
+    if (typeof MutationObserver !== 'undefined') {
+      mutationObserver = new MutationObserver(handleMutation);
+      mutationObserver.observe(tabListRef.current, {
+        childList: true,
+      });
+    }
+
     return () => {
       handleResize.clear();
       win.removeEventListener('resize', handleResize);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
+      mutationObserver?.disconnect();
+      resizeObserver?.disconnect();
     };
-  }, [updateIndicatorState]);
+  }, [updateIndicatorState, updateScrollButtonState]);
 
   /**
    * Toggle visibility of start and end scroll buttons
@@ -663,17 +768,17 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
     [updateIndicatorState, updateScrollButtonState],
   );
 
-  const indicator = (
-    <TabsIndicator
-      {...TabIndicatorProps}
-      className={clsx(classes.indicator, TabIndicatorProps.className)}
-      ownerState={ownerState}
-      style={{
-        ...indicatorStyle,
-        ...TabIndicatorProps.style,
-      }}
-    />
-  );
+  const [IndicatorSlot, indicatorSlotProps] = useSlot('indicator', {
+    className: clsx(classes.indicator, TabIndicatorProps.className),
+    elementType: TabsIndicator,
+    externalForwardedProps,
+    ownerState,
+    additionalProps: {
+      style: indicatorStyle,
+    },
+  });
+
+  const indicator = <IndicatorSlot {...indicatorSlotProps} />;
 
   let childIndex = 0;
   const children = React.Children.map(childrenProp, (child) => {
@@ -752,52 +857,76 @@ const Tabs = React.forwardRef(function Tabs(inProps, ref) {
 
   const conditionalElements = getConditionalElements();
 
+  const [RootSlot, rootSlotProps] = useSlot('root', {
+    ref,
+    className: clsx(classes.root, className),
+    elementType: TabsRoot,
+    externalForwardedProps: {
+      ...externalForwardedProps,
+      ...other,
+      component,
+    },
+    ownerState,
+  });
+
+  const [ScrollerSlot, scrollerSlotProps] = useSlot('scroller', {
+    ref: tabsRef,
+    className: classes.scroller,
+    elementType: TabsScroller,
+    externalForwardedProps,
+    ownerState,
+    additionalProps: {
+      style: {
+        overflow: scrollerStyle.overflow,
+        [vertical ? `margin${isRtl ? 'Left' : 'Right'}` : 'marginBottom']: visibleScrollbar
+          ? undefined
+          : -scrollerStyle.scrollbarWidth,
+      },
+    },
+  });
+
+  const [ListSlot, listSlotProps] = useSlot('list', {
+    ref: tabListRef,
+    className: clsx(classes.list, classes.flexContainer),
+    elementType: List,
+    externalForwardedProps,
+    ownerState,
+    getSlotProps: (handlers) => ({
+      ...handlers,
+      onKeyDown: (event) => {
+        handleKeyDown(event);
+        handlers.onKeyDown?.(event);
+      },
+    }),
+  });
+
   return (
-    <TabsRoot
-      className={clsx(classes.root, className)}
-      ownerState={ownerState}
-      ref={ref}
-      as={component}
-      {...other}
-    >
+    <RootSlot {...rootSlotProps}>
       {conditionalElements.scrollButtonStart}
       {conditionalElements.scrollbarSizeListener}
-      <TabsScroller
-        className={classes.scroller}
-        ownerState={ownerState}
-        style={{
-          overflow: scrollerStyle.overflow,
-          [vertical ? `margin${isRtl ? 'Left' : 'Right'}` : 'marginBottom']: visibleScrollbar
-            ? undefined
-            : -scrollerStyle.scrollbarWidth,
-        }}
-        ref={tabsRef}
-      >
+      <ScrollerSlot {...scrollerSlotProps}>
         {/* The tablist isn't interactive but the tabs are */}
-        <FlexContainer
+        <ListSlot
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           aria-orientation={orientation === 'vertical' ? 'vertical' : null}
-          className={classes.flexContainer}
-          ownerState={ownerState}
-          onKeyDown={handleKeyDown}
-          ref={tabListRef}
           role="tablist"
+          {...listSlotProps}
         >
           {children}
-        </FlexContainer>
+        </ListSlot>
         {mounted && indicator}
-      </TabsScroller>
+      </ScrollerSlot>
       {conditionalElements.scrollButtonEnd}
-    </TabsRoot>
+    </RootSlot>
   );
 });
 
 Tabs.propTypes /* remove-proptypes */ = {
-  // ----------------------------- Warning --------------------------------
-  // | These PropTypes are generated from the TypeScript type definitions |
-  // |     To update them edit the d.ts file and run "yarn proptypes"     |
-  // ----------------------------------------------------------------------
+  // ┌────────────────────────────── Warning ──────────────────────────────┐
+  // │ These PropTypes are generated from the TypeScript type definitions. │
+  // │    To update them, edit the d.ts file and run `pnpm proptypes`.     │
+  // └─────────────────────────────────────────────────────────────────────┘
   /**
    * Callback fired when the component mounts.
    * This is useful when you want to trigger an action programmatically.
@@ -866,6 +995,7 @@ Tabs.propTypes /* remove-proptypes */ = {
   orientation: PropTypes.oneOf(['horizontal', 'vertical']),
   /**
    * The component used to render the scroll buttons.
+   * @deprecated use the `slots.scrollButtons` prop instead. This prop will be removed in v7. See [Migrating from deprecated APIs](https://mui.com/material-ui/migration/migrating-from-deprecated-apis/) for more details.
    * @default TabScrollButton
    */
   ScrollButtonComponent: PropTypes.elementType,
@@ -887,12 +1017,17 @@ Tabs.propTypes /* remove-proptypes */ = {
    */
   selectionFollowsFocus: PropTypes.bool,
   /**
-   * The extra props for the slot components.
-   * You can override the existing props or add new ones.
+   * The props used for each slot inside.
    * @default {}
    */
   slotProps: PropTypes.shape({
     endScrollButtonIcon: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    indicator: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    list: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    root: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    scrollbar: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    scrollButtons: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+    scroller: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     startScrollButtonIcon: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
   }),
   /**
@@ -900,7 +1035,15 @@ Tabs.propTypes /* remove-proptypes */ = {
    * @default {}
    */
   slots: PropTypes.shape({
+    endScrollButtonIcon: PropTypes.elementType,
     EndScrollButtonIcon: PropTypes.elementType,
+    indicator: PropTypes.elementType,
+    list: PropTypes.elementType,
+    root: PropTypes.elementType,
+    scrollbar: PropTypes.elementType,
+    scrollButtons: PropTypes.elementType,
+    scroller: PropTypes.elementType,
+    startScrollButtonIcon: PropTypes.elementType,
     StartScrollButtonIcon: PropTypes.elementType,
   }),
   /**
@@ -913,11 +1056,13 @@ Tabs.propTypes /* remove-proptypes */ = {
   ]),
   /**
    * Props applied to the tab indicator element.
+   * @deprecated use the `slotProps.indicator` prop instead. This prop will be removed in v7. See [Migrating from deprecated APIs](https://mui.com/material-ui/migration/migrating-from-deprecated-apis/) for more details.
    * @default  {}
    */
   TabIndicatorProps: PropTypes.object,
   /**
-   * Props applied to the [`TabScrollButton`](/material-ui/api/tab-scroll-button/) element.
+   * Props applied to the [`TabScrollButton`](https://mui.com/material-ui/api/tab-scroll-button/) element.
+   * @deprecated use the `slotProps.scrollButtons` prop instead. This prop will be removed in v7. See [Migrating from deprecated APIs](https://mui.com/material-ui/migration/migrating-from-deprecated-apis/) for more details.
    * @default {}
    */
   TabScrollButtonProps: PropTypes.object,
@@ -936,7 +1081,7 @@ Tabs.propTypes /* remove-proptypes */ = {
    *
    *  - `scrollable` will invoke scrolling properties and allow for horizontally
    *  scrolling (or swiping) of the tab bar.
-   *  -`fullWidth` will make the tabs grow to use all the available space,
+   *  - `fullWidth` will make the tabs grow to use all the available space,
    *  which should be used for small views, like on mobile.
    *  - `standard` will render the default state.
    * @default 'standard'

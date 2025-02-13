@@ -5,6 +5,10 @@ import { ExtendButtonBase, ExtendButtonBaseTypeMap } from '../ButtonBase';
 import { OverrideProps } from '../OverridableComponent';
 import { ListItemButtonClasses } from './listItemButtonClasses';
 
+/**
+ * This interface is kept for backward compatibility. To extend `LitItemButton`
+ * props through module augmentation, use `ListItemButtonOwnProps`.
+ */
 export interface ListItemButtonBaseProps {
   /**
    * Defines the `align-items` style property.
@@ -58,24 +62,26 @@ export interface ListItemButtonBaseProps {
   sx?: SxProps<Theme>;
 }
 
+export interface ListItemButtonOwnProps extends ListItemButtonBaseProps {}
+
 export type ListItemButtonTypeMap<
   AdditionalProps = {},
-  DefaultComponent extends React.ElementType = 'div',
+  RootComponent extends React.ElementType = 'div',
 > = ExtendButtonBaseTypeMap<{
-  props: AdditionalProps & ListItemButtonBaseProps;
-  defaultComponent: DefaultComponent;
+  props: AdditionalProps & ListItemButtonOwnProps;
+  defaultComponent: RootComponent;
 }>;
 
 /**
  *
  * Demos:
  *
- * - [Lists](https://mui.com/material-ui/react-list/)
+ * - [Lists](https://next.mui.com/material-ui/react-list/)
  *
  * API:
  *
- * - [ListItemButton API](https://mui.com/material-ui/api/list-item-button/)
- * - inherits [ButtonBase API](https://mui.com/material-ui/api/button-base/)
+ * - [ListItemButton API](https://next.mui.com/material-ui/api/list-item-button/)
+ * - inherits [ButtonBase API](https://next.mui.com/material-ui/api/button-base/)
  */
 declare const ListItemButton: ExtendButtonBase<ListItemButtonTypeMap>;
 

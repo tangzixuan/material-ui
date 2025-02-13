@@ -1,11 +1,12 @@
 ---
 productId: material-ui
 title: React Button component
-components: Button, IconButton, ButtonBase, LoadingButton
+components: Button, IconButton, ButtonBase
 materialDesign: https://m2.material.io/components/buttons
 githubLabel: 'component: button'
 waiAria: https://www.w3.org/WAI/ARIA/apg/patterns/button/
 unstyled: /base-ui/react-button/
+githubSource: packages/mui-material/src/Button
 ---
 
 # Button
@@ -19,7 +20,7 @@ Buttons communicate actions that users can take. They are typically placed throu
 - Cards
 - Toolbars
 
-{{"component": "modules/components/ComponentLinkHeader.js"}}
+{{"component": "@mui/docs/ComponentLinkHeader"}}
 
 ## Basic button
 
@@ -112,6 +113,45 @@ Use `color` prop to apply theme color palette to component.
 
 {{"demo": "IconButtonColors.js"}}
 
+### Loading
+
+Starting from v6.4.0, use `loading` prop to set icon buttons in a loading state and disable interactions.
+
+{{"demo": "LoadingIconButton.js"}}
+
+### Badge
+
+You can use the [`Badge`](/material-ui/react-badge/) component to add a badge to an `IconButton`.
+
+{{"demo": "IconButtonWithBadge.js"}}
+
+## File upload
+
+To create a file upload button, turn the button into a label using `component="label"` and then create a visually-hidden input with type `file`.
+
+{{"demo": "InputFileUpload.js"}}
+
+## Loading
+
+Starting from v6.4.0, use the `loading` prop to set buttons in a loading state and disable interactions.
+
+{{"demo": "LoadingButtons.js"}}
+
+Toggle the loading switch to see the transition between the different states.
+
+{{"demo": "LoadingButtonsTransition.js"}}
+
+:::warning
+When the `loading` prop is set to `boolean`, the loading wrapper is always present in the DOM to prevent a [Google Translation Crash](https://github.com/mui/material-ui/issues/27853).
+
+The `loading` value should always be `null` or `boolean`. The pattern below is not recommended as it can cause the Google Translation crash:
+
+```jsx
+<Button {...(isFetching && { loading: true })}> // ❌ Don't do this
+```
+
+:::
+
 ## Customization
 
 Here are some examples of customizing the component.
@@ -119,7 +159,7 @@ You can learn more about this in the [overrides documentation page](/material-ui
 
 {{"demo": "CustomizedButtons.js", "defaultCodeOpen": false}}
 
-🎨 If you are looking for inspiration, you can check [MUI Treasury's customization examples](https://mui-treasury.com/styles/button/).
+🎨 If you are looking for inspiration, you can check [MUI Treasury's customization examples](https://mui-treasury.com/?path=/docs/button-introduction--docs).
 
 ## Complex button
 
@@ -132,7 +172,7 @@ You can take advantage of this lower-level component to build custom interaction
 
 One frequent use case is to perform navigation on the client only, without an HTTP round-trip to the server.
 The `ButtonBase` component provides the `component` prop to handle this use case.
-Here is a [more detailed guide](/material-ui/guides/routing/#button).
+Here is a [more detailed guide](/material-ui/integrations/routing/#button).
 
 ## Limitations
 
@@ -167,39 +207,3 @@ However:
 ```
 
 This has the advantage of supporting any element, for instance, a link `<a>` element.
-
-## Experimental API
-
-### Loading button
-
-[`@mui/lab`](/material-ui/about-the-lab/) offers loading buttons that can show loading state and disable interactions.
-
-{{"demo": "LoadingButtons.js"}}
-
-Toggle the loading switch to see the transition between the different states.
-
-{{"demo": "LoadingButtonsTransition.js"}}
-
-:::warning
-There is a [known issue](https://github.com/mui/material-ui/issues/27853) with translating a page using Chrome tools when a Loading Button is present.
-After the page is translated, the application crashes when the loading state of a Button changes.
-To prevent this, ensure that the contents of the Loading Button are nested inside any HTML element, such as a `<span>`:
-
-```jsx
-<LoadingButton loading variant="outlined">
-  <span>Submit</span>
-</LoadingButton>
-```
-
-:::
-
-### Material You version
-
-The default Button component follows the Material Design 2 specs.
-For the Material Design 3 ([Material You](https://m3.material.io/)) version, you can use the new experimental `@mui/material-next` package:
-
-```js
-import Button from '@mui/material-next/Button';
-```
-
-{{"demo": "ButtonMaterialYouPlayground.js", "hideToolbar": true}}

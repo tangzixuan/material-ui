@@ -5,34 +5,36 @@ import { ButtonBaseTypeMap, ExtendButtonBase, ExtendButtonBaseTypeMap } from '..
 import { OverrideProps } from '../OverridableComponent';
 import { CardActionAreaClasses } from './cardActionAreaClasses';
 
+export interface CardActionAreaOwnProps {
+  /**
+   * Override or extend the styles applied to the component.
+   */
+  classes?: Partial<CardActionAreaClasses>;
+  focusVisibleClassName?: string;
+  /**
+   * The system prop that allows defining system overrides as well as additional CSS styles.
+   */
+  sx?: SxProps<Theme>;
+}
+
 export type CardActionAreaTypeMap<
   AdditionalProps,
-  DefaultComponent extends React.ElementType,
+  RootComponent extends React.ElementType,
 > = ExtendButtonBaseTypeMap<{
-  props: AdditionalProps & {
-    /**
-     * Override or extend the styles applied to the component.
-     */
-    classes?: Partial<CardActionAreaClasses>;
-    focusVisibleClassName?: string;
-    /**
-     * The system prop that allows defining system overrides as well as additional CSS styles.
-     */
-    sx?: SxProps<Theme>;
-  };
-  defaultComponent: DefaultComponent;
+  props: AdditionalProps & CardActionAreaOwnProps;
+  defaultComponent: RootComponent;
 }>;
 
 /**
  *
  * Demos:
  *
- * - [Card](https://mui.com/material-ui/react-card/)
+ * - [Card](https://next.mui.com/material-ui/react-card/)
  *
  * API:
  *
- * - [CardActionArea API](https://mui.com/material-ui/api/card-action-area/)
- * - inherits [ButtonBase API](https://mui.com/material-ui/api/button-base/)
+ * - [CardActionArea API](https://next.mui.com/material-ui/api/card-action-area/)
+ * - inherits [ButtonBase API](https://next.mui.com/material-ui/api/button-base/)
  */
 declare const CardActionArea: ExtendButtonBase<
   CardActionAreaTypeMap<{}, ButtonBaseTypeMap['defaultComponent']>

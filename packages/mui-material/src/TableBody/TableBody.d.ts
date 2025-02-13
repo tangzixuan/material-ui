@@ -4,35 +4,37 @@ import { Theme } from '..';
 import { OverridableComponent, OverrideProps } from '../OverridableComponent';
 import { TableBodyClasses } from './tableBodyClasses';
 
+export interface TableBodyOwnProps {
+  /**
+   * The content of the component, normally `TableRow`.
+   */
+  children?: React.ReactNode;
+  /**
+   * Override or extend the styles applied to the component.
+   */
+  classes?: Partial<TableBodyClasses>;
+  /**
+   * The system prop that allows defining system overrides as well as additional CSS styles.
+   */
+  sx?: SxProps<Theme>;
+}
+
 export interface TableBodyTypeMap<
   AdditionalProps = {},
-  DefaultComponent extends React.ElementType = 'tbody',
+  RootComponent extends React.ElementType = 'tbody',
 > {
-  props: AdditionalProps & {
-    /**
-     * The content of the component, normally `TableRow`.
-     */
-    children?: React.ReactNode;
-    /**
-     * Override or extend the styles applied to the component.
-     */
-    classes?: Partial<TableBodyClasses>;
-    /**
-     * The system prop that allows defining system overrides as well as additional CSS styles.
-     */
-    sx?: SxProps<Theme>;
-  };
-  defaultComponent: DefaultComponent;
+  props: AdditionalProps & TableBodyOwnProps;
+  defaultComponent: RootComponent;
 }
 /**
  *
  * Demos:
  *
- * - [Table](https://mui.com/material-ui/react-table/)
+ * - [Table](https://next.mui.com/material-ui/react-table/)
  *
  * API:
  *
- * - [TableBody API](https://mui.com/material-ui/api/table-body/)
+ * - [TableBody API](https://next.mui.com/material-ui/api/table-body/)
  */
 declare const TableBody: OverridableComponent<TableBodyTypeMap>;
 

@@ -41,9 +41,10 @@ export default function TransitionsSnackbar() {
       <Snackbar
         open={state.open}
         onClose={handleClose}
-        TransitionComponent={state.Transition}
+        slots={{ transition: state.Transition }}
         message="I love snacks"
         key={state.Transition.name}
+        autoHideDuration={1200}
       />
     </div>
   );

@@ -131,6 +131,11 @@ function getExplicitPropsDeclaration(
 ): NodePath | undefined {
   const functionNode = getRenderBody(componentDefinition, importer);
 
+  // No function body available to inspect.
+  if (!functionNode.value) {
+    return undefined;
+  }
+
   let propsPath: NodePath | undefined;
   // visitVariableDeclarator, can't use visit body.node since it looses scope information
   functionNode
@@ -165,9 +170,7 @@ function getExplicitPropsDeclaration(
 const defaultPropsHandler: Handler = (documentation, componentDefinition, importer) => {
   const props = getExplicitPropsDeclaration(componentDefinition, importer);
 
-  if (props !== undefined) {
-    getDefaultValuesFromProps(props.get('properties'), documentation, importer);
-  }
+  getDefaultValuesFromProps(props?.get('properties') ?? [], documentation, importer);
 };
 
 export default defaultPropsHandler;

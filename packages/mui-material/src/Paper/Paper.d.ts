@@ -40,22 +40,22 @@ export interface PaperOwnProps {
 
 export interface PaperTypeMap<
   AdditionalProps = {},
-  DefaultComponent extends React.ElementType = 'div',
+  RootComponent extends React.ElementType = 'div',
 > {
   props: AdditionalProps & PaperOwnProps;
-  defaultComponent: DefaultComponent;
+  defaultComponent: RootComponent;
 }
 
 /**
  *
  * Demos:
  *
- * - [Card](https://mui.com/material-ui/react-card/)
- * - [Paper](https://mui.com/material-ui/react-paper/)
+ * - [Card](https://next.mui.com/material-ui/react-card/)
+ * - [Paper](https://next.mui.com/material-ui/react-paper/)
  *
  * API:
  *
- * - [Paper API](https://mui.com/material-ui/api/paper/)
+ * - [Paper API](https://next.mui.com/material-ui/api/paper/)
  */
 declare const Paper: OverridableComponent<PaperTypeMap>;
 

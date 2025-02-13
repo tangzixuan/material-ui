@@ -3,13 +3,18 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import { unstable_capitalize as capitalize } from '@mui/utils';
 import { unstable_composeClasses as composeClasses } from '@mui/base/composeClasses';
-import { useMenuItem } from '@mui/base/useMenuItem';
+import { useMenuItem, useMenuItemContextStabilizer } from '@mui/base/useMenuItem';
+import { ListContext } from '@mui/base/useList';
 import { StyledListItemButton } from '../ListItemButton/ListItemButton';
 import { styled, useThemeProps } from '../styles';
-import { useColorInversion } from '../styles/ColorInversion';
 import { useVariantColor } from '../styles/variantColorInheritance';
 import { getMenuItemUtilityClass } from './menuItemClasses';
-import { MenuItemOwnerState, ExtendMenuItem, MenuItemTypeMap } from './MenuItemProps';
+import {
+  MenuItemOwnerState,
+  ExtendMenuItem,
+  MenuItemTypeMap,
+  MenuItemProps,
+} from './MenuItemProps';
 import RowListContext from '../List/RowListContext';
 import ListItemButtonOrientationContext from '../ListItemButton/ListItemButtonOrientationContext';
 import useSlot from '../utils/useSlot';
@@ -37,18 +42,11 @@ const MenuItemRoot = styled(StyledListItemButton, {
   slot: 'Root',
   overridesResolver: (props, styles) => styles.root,
 })<{ ownerState: MenuItemOwnerState }>({});
-/**
- *
- * Demos:
- *
- * - [Menu](https://mui.com/joy-ui/react-menu/)
- *
- * API:
- *
- * - [MenuItem API](https://mui.com/joy-ui/api/menu-item/)
- * - inherits [ListItemButton API](https://mui.com/joy-ui/api/list-item-button/)
- */
-const MenuItem = React.forwardRef(function MenuItem(inProps, ref) {
+
+const InnerMenuItem = React.forwardRef(function InnerMenuItem(
+  inProps: MenuItemProps,
+  ref: React.ForwardedRef<Element>,
+) {
   const props = useThemeProps({
     props: inProps,
     name: 'JoyMenuItem',
@@ -66,16 +64,16 @@ const MenuItem = React.forwardRef(function MenuItem(inProps, ref) {
     variant: variantProp = 'plain',
     slots = {},
     slotProps = {},
+    id,
     ...other
   } = props;
-  const { variant = variantProp, color: inheritedColor = colorProp } = useVariantColor(
+  const { variant = variantProp, color = colorProp } = useVariantColor(
     inProps.variant,
     inProps.color,
   );
-  const { getColor } = useColorInversion(variant);
-  const color = getColor(inProps.color, inheritedColor);
 
   const { getRootProps, disabled, focusVisible } = useMenuItem({
+    id,
     disabled: disabledProp,
     rootRef: ref,
   });
@@ -109,13 +107,13 @@ const MenuItem = React.forwardRef(function MenuItem(inProps, ref) {
       <SlotRoot {...rootProps}>{children}</SlotRoot>
     </ListItemButtonOrientationContext.Provider>
   );
-}) as ExtendMenuItem<MenuItemTypeMap>;
+});
 
-MenuItem.propTypes /* remove-proptypes */ = {
-  // ----------------------------- Warning --------------------------------
-  // | These PropTypes are generated from the TypeScript type definitions |
-  // |     To update them edit TypeScript types and run "yarn proptypes"  |
-  // ----------------------------------------------------------------------
+InnerMenuItem.propTypes /* remove-proptypes */ = {
+  // ┌────────────────────────────── Warning ──────────────────────────────┐
+  // │ These PropTypes are generated from the TypeScript type definitions. │
+  // │ To update them, edit the TypeScript types and run `pnpm proptypes`. │
+  // └─────────────────────────────────────────────────────────────────────┘
   /**
    * The content of the component.
    */
@@ -128,14 +126,13 @@ MenuItem.propTypes /* remove-proptypes */ = {
     PropTypes.oneOf(['danger', 'neutral', 'primary', 'success', 'warning']),
     PropTypes.string,
   ]),
-  /**
-   * @ignore
-   */
   component: PropTypes.elementType,
   /**
-   * @ignore
+   * If `true`, the component is disabled.
+   * @default false
    */
   disabled: PropTypes.bool,
+  id: PropTypes.string,
   /**
    * The content direction flow.
    * @default 'horizontal'
@@ -165,9 +162,50 @@ MenuItem.propTypes /* remove-proptypes */ = {
    * @default 'plain'
    */
   variant: PropTypes /* @typescript-to-proptypes-ignore */.oneOfType([
-    PropTypes.oneOf(['contained', 'light', 'outlined', 'text']),
+    PropTypes.oneOf(['outlined', 'plain', 'soft', 'solid']),
     PropTypes.string,
   ]),
 } as any;
 
-export default MenuItem;
+const MenuItem = React.memo(InnerMenuItem);
+/**
+ *
+ * Demos:
+ *
+ * - [Menu](https://mui.com/joy-ui/react-menu/)
+ *
+ * API:
+ *
+ * - [MenuItem API](https://mui.com/joy-ui/api/menu-item/)
+ * - inherits [ListItemButton API](https://mui.com/joy-ui/api/list-item-button/)
+ */
+const StableMenuItem = React.forwardRef(function StableMenuItem(
+  props: MenuItemProps,
+  ref: React.ForwardedRef<Element>,
+) {
+  // This wrapper component is used as a performance optimization.
+  // `useMenuItemContextStabilizer` ensures that the context value
+  // is stable across renders, so that the actual MenuItem re-renders
+  // only when it needs to.
+  const { contextValue, id } = useMenuItemContextStabilizer(props.id);
+
+  return (
+    <ListContext.Provider value={contextValue}>
+      <MenuItem {...props} id={id} ref={ref} />
+    </ListContext.Provider>
+  );
+}) as ExtendMenuItem<MenuItemTypeMap>;
+
+StableMenuItem.propTypes /* remove-proptypes */ = {
+  // ┌────────────────────────────── Warning ──────────────────────────────┐
+  // │ These PropTypes are generated from the TypeScript type definitions. │
+  // │ To update them, edit the TypeScript types and run `pnpm proptypes`. │
+  // └─────────────────────────────────────────────────────────────────────┘
+  /**
+   * The content of the component.
+   */
+  children: PropTypes.node,
+  id: PropTypes.string,
+} as any;
+
+export default StableMenuItem;
